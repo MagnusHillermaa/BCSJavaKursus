@@ -36,11 +36,36 @@ public class programm {
         funk(int a, int b, int c)
             tagastab kõige nullile lähema  neg arvu, kui ei ole, siis nullile lähima pos arvu
          */
+        System.out.println(olympiaad(1, 97));
+    }
+    public static int olympiaad(int a, int b){
+        return olympiaad(a, b,0);
+    }
 
+    public static int olympiaad(int a, int b, int counter){
+        System.out.println("counter: " + counter + " | a: " + a + " |b: " + b);
+        if (a != 1) {
+            if (a % 2 == 1) {
+                a = 3 * a + 1;
+            } else {
+                a = a / 2;
+            }
+            counter++;
+        }
+        if (b != 1) {
+            if (b % 2 == 1) {
+                b = 3 * b + 1;
+            } else {
+                b = b / 2;
+            }
+            counter--;
+        }
+        if (a != b) {
+            counter = olympiaad(a, b, counter);
+        }
+        return abs(counter);
     }
-    public static void olympiaad(){
-        
-    }
+
     public static void korrutustabel(){
         int a,b=0;
         String tyhik=" ";
@@ -77,7 +102,7 @@ public class programm {
         return fibionacci(0,1,mitmesArv);
     }
     public static int fibionacci(int arv, int jargmineArv, int mitmesArv){
-        int tulemus=arv;
+        int tulemus = arv;
         mitmesArv--;
         if (mitmesArv>0) {
             tulemus = fibionacci(jargmineArv, arv+jargmineArv,mitmesArv);
