@@ -14,11 +14,11 @@ public class Loeng2VeebiYlesanne3 {
     // + Possibility to trap virus (double link + 2 links in a row)
     //
     // node strukture
-        //gatewayConnections - number of gateways connected to node
-        //shortest way player int
-        //priority shortest way to player -gatewayConnections
+    //gatewayConnections - number of gateways connected to node
+    //shortest way player int
+    //priority shortest way to player -gatewayConnections
     //number of connected links
-    public static void main (String args[]){
+    public static void main(String args[]) {
 
 
         int[][] links;
@@ -28,83 +28,93 @@ public class Loeng2VeebiYlesanne3 {
         links = GenLinks(Set);
         gateways = GenGateways(Set);
 
-        HashMap<Integer, Node> nodes= new HashMap<Integer, Node>();
+        HashMap<Integer, Node> nodes = new HashMap<Integer, Node>();
         Node nodeA;
         Node nodeB;
 
-        for (int i=0;i<links.length;i++){
+        for (int i = 0; i < links.length; i++) {
 
-            //if nodes in hashmap, then use them
-            if(nodes.containsKey(links[i][1])){
-                nodeA = nodes.get(links[i][1]);
-            } else{
+            //if nodes in hashmap, then use them, if not, then initialize new node
+            if (nodes.containsKey(links[i][1])) {
+                nodeA = nodes.get(links[i][0]);
+            } else {
                 nodeA = new Node();
-                nodeA.id = links[i][1];
+                nodeA.id = links[i][0];
+                nodeA.isGateway = IsGateway(nodeA.id, gateways);
             }
-                if (nodes.containsKey(links[i][2])){
-                nodeB = nodes.get(links[i][2]);
-            } else{
-                    nodeB = new Node();
-                    nodeB.id = links[i][2];
-                }
+            if (nodes.containsKey(links[i][1])) {
+                nodeB = nodes.get(links[i][1]);
+            } else {
+                nodeB = new Node();
+                nodeB.id = links[i][1];
+                nodeB.isGateway = IsGateway(nodeB.id, gateways);
+            }
 
+            nodeA.connectedNodes.computeIfAbsent(nodeB.id, nodeB);
+            nodeB.connectedNodes.computeIfAbsent(nodeB.id, nodeA);
 
+            //check if connected node exists
+            if (!(nodeA.connectedNodes.containsKey(nodeB.id))){
+                nodeA.connectedNodes.(nodeB);
+            }
             nodeA.connectedNodes.add(nodeB);
             nodeB.connectedNodes.add(nodeA);
-            for (int gateway:gateways) {
-                if (links[i][1]==gateway){
+            for (int gateway : gateways) {
+                if (links[i][1] == gateway) {
                     nodeA.isGateway = true;
 
-                };
+                }
+                ;
             }
         }
 
     }
-    public static boolean IsGateway(int node, int[] gateways){
 
-        for (int gateway:gateways) {
-            if (node==gateway){
+    public static boolean IsGateway(int node, int[] gateways) {
+        for (int gateway : gateways) {
+            if (node == gateway) {
                 return true;
-            } else return false;
+            }
         }
         return false;
     }
 
-    public static int[][] GenLinks(int Set){
+    public static int[][] GenLinks(int Set) {
         int[][] links;
 
-        switch(Set){
-            case 1:{
+        switch (Set) {
+            case 1: {
                 links = new int[][]{
-                    {1,2,1},
-                    {1,3,1},
-                    {2,4,1},
-                    {2,6,1},
-                    {3,5,1},
-                    {3,6,1},
-                    {4,6,1},
-                    {4,7,1},
-                    {5,6,1},
-                    {5,8,1},
-                    {6,7,1},
-                    {6,8,1},
+                        {1, 2, 1},
+                        {1, 3, 1},
+                        {2, 4, 1},
+                        {2, 6, 1},
+                        {3, 5, 1},
+                        {3, 6, 1},
+                        {4, 6, 1},
+                        {4, 7, 1},
+                        {5, 6, 1},
+                        {5, 8, 1},
+                        {6, 7, 1},
+                        {6, 8, 1},
                 };
                 break;
             }
-            default:{
+            default: {
                 links = new int[][]{};
             }
         }
         return links;
     }
-    public static int[] GenGateways(int Set){
+
+    public static int[] GenGateways(int Set) {
         int[] gateways;
-        switch(Set){
-            case 1:{
-                gateways = new int[]{7,8};
+        switch (Set) {
+            case 1: {
+                gateways = new int[]{7, 8};
                 break;
             }
-            default:{
+            default: {
                 gateways = new int[]{};
             }
         }
