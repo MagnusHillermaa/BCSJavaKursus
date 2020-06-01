@@ -1,0 +1,21 @@
+{
+  "clients": [{
+    "name": "Magnus",
+    "age": "30",
+    "adress": "Aia 7",
+    "cars": ["Honda", "Toyota", "Nissan"]
+  },
+    {
+      "name": "Madis",
+      "age": "32",
+      "adress": "Aia 8",
+      "cars": ["Honda"]
+    },
+    {
+      "name": "Tarvo",
+      "age": "33",
+      "adress": "Aia 9",
+      "cars": ["Honda", "Nissan"]
+    }
+  ]
+}
