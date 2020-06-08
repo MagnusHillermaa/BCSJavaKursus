@@ -1,4 +1,6 @@
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.function.BiFunction;
 
 public class Test {
@@ -11,5 +13,11 @@ public class Test {
             j++;
             System.out.println(choicesUntilGateway.get(1));
         }
+        HashMap<Integer, Node> NodesData = new HashMap<>();
+    }
+    public static class Node {
+        public boolean isGateway = false;
+        public int riskLevel = 0;
+        public List<Integer> connections = new ArrayList<>();
     }
 }

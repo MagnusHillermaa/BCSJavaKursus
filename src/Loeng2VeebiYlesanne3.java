@@ -8,33 +8,31 @@ import java.util.function.BiFunction;
 
 
 public class Loeng2VeebiYlesanne3 {
-    // generate test data
-    // + is virus next to gateway?
-    // + mark multi node gateways
-    // + distance from multi GNode (node before gateWay)
-    //   + measure from node before gateway to virus to score risk
-    //
-    // + Possibility to trap virus (double link + 2 links in a row)
-    //
-    // node strukture
-    //gatewayConnections - number of gateways connected to node
-    //shortest way player int
-    //priority shortest way to player -gatewayConnections
-    //number of connected links
-    public static void main(String args[]) {
 
+    public static class Node {
+        public Integer id;
+        // Freedom means number of choices(value) you can do before virus reaches specific gateway(key)
+        public HashMap<Integer, Integer> freedom = new HashMap<>();
+        public boolean isGateway = false;
+        public int numberOfConnectedGateways = 0;
+        public HashMap<Integer, Node> connectedNodes = new HashMap<>();
+    }
+
+
+    public static void main(String args[]) {
 
         int[][] links;
         int[] gateways;
         int Set = 1;
+        Integer virusNode = 1;
 
         links = GenLinks(Set);
         gateways = GenGateways(Set);
 
+
         HashMap<Integer, Node> nodes = new HashMap<Integer, Node>();
         HashMap<Integer, Node> twoGatewayNodes = new HashMap<Integer, Node>();
         Node nodeA, nodeB;
-        Integer virusNode = 1;
 
         //fill nodes info based on links
         for (int i = 0; i < links.length; i++) {
@@ -86,44 +84,49 @@ public class Loeng2VeebiYlesanne3 {
         int freedomForNodeNext;
 
 
+        //For each g2Nodes populate nodes with freedom
         for (Map.Entry<Integer, Node> g2Node : twoGatewayNodes.entrySet()
         ) {
             unSettled.clear();
             settled.clear();
+            g2Node.getValue().freedom.put(g2Node.getKey(), -1);
+            //For each node in g2Nodes connected Nodes
             for (Node node : g2Node.getValue().connectedNodes.values()) {
-                //Set first leafs freedom -1+(1-nr of leaf connected Gateways)
+                //Set first leafs freedom g2Node freedom (-1)+(1-nr of leaf connected Gateways)
                 if (node.freedom.containsKey(g2Node.getKey())) {
-                    if (node.freedom.get(g2Node.getKey()) > 1 - node.numberOfConnectedGateways) {
-                        node.freedom.replace(g2Node.getKey(), 1 - node.numberOfConnectedGateways);
+                    if (node.freedom.get(g2Node.getKey()) > -node.numberOfConnectedGateways) {
+                        node.freedom.replace(g2Node.getKey(), -node.numberOfConnectedGateways);
                     }
                 } else {
-                    node.freedom.put(g2Node.getKey(), 1 - node.numberOfConnectedGateways);
+                    node.freedom.put(g2Node.getKey(), -node.numberOfConnectedGateways);
                 }
                 //If node is not Gateway then add to unSettled
                 if (!node.isGateway) {
                     unSettled.add(node);
                 }
             }
+            settled.add(g2Node.getValue());
+
             //Iterate through all leafs from the g2Node
             while (unSettled.listIterator().hasNext()) {
                 nodeCurr = unSettled.listIterator().next();
                 settled.add(nodeCurr);
 
                 //Loop through nodeCurr leafs
-                for (Node nodeLeaf : nodeCurr.connectedNodes.values()
+                for (Node nodeCurrLeaf : nodeCurr.connectedNodes.values()
                 ) {
                     //If not settled and not Gateway
-                    if (!settled.contains(nodeLeaf) && !nodeLeaf.isGateway) {
-                        freedomForNodeNext = (1 - nodeLeaf.numberOfConnectedGateways) + nodeCurr.freedom.get(g2Node.getKey());
+                    if (!settled.contains(nodeCurrLeaf) && !nodeCurrLeaf.isGateway) {
+                        freedomForNodeNext = (1 - nodeCurrLeaf.numberOfConnectedGateways) + nodeCurr.freedom.get(g2Node.getKey());
                         //Set freedom related to two gateway node (g2Node)
-                        if (nodeLeaf.freedom.containsKey(g2Node.getKey())) {
-                            if (nodeLeaf.freedom.get(g2Node.getKey()) > freedomForNodeNext) {
-                                nodeLeaf.freedom.replace(g2Node.getKey(), freedomForNodeNext);
+                        if (nodeCurrLeaf.freedom.containsKey(g2Node.getKey())) {
+                            if (nodeCurrLeaf.freedom.get(g2Node.getKey()) > freedomForNodeNext) {
+                                nodeCurrLeaf.freedom.replace(g2Node.getKey(), freedomForNodeNext);
                             }
                         } else {
-                            nodeLeaf.freedom.put(g2Node.getKey(), freedomForNodeNext);
+                            nodeCurrLeaf.freedom.put(g2Node.getKey(), freedomForNodeNext);
                         }
-                        unSettled.add(nodeLeaf);
+                        unSettled.add(nodeCurrLeaf);
                     }
                 }
                 unSettled.remove(nodeCurr);
@@ -133,14 +136,23 @@ public class Loeng2VeebiYlesanne3 {
         //Play loop
         //TODO Algorith flaw - if g1Nodes are removed, then connectednodes lengths are not updated
         int minFreedomG2Node = 1; //nasty hack, this is gateway connected node that we will work with
-        int minFreedom = 100;
+        int minFreedom = 100; //impossibly high number
         int minFreedomGatewayNode = 1; //gateway node connected to the focus node
 
+        //If next to gateway, then remove this link
         if ((nodes.get(virusNode).numberOfConnectedGateways == 1)) {
             minFreedomG2Node = virusNode;
 
-        }else{
-
+        } else if (nodes.get(virusNode).freedom.size() == 0) {
+            for (Node node : nodes.values()
+            ) {
+                if (!node.isGateway && node.numberOfConnectedGateways == 1) {
+                    minFreedomG2Node = node.id;
+                }
+                ;
+            }
+        } else {
+            //find lowest freedom gateway
             for (Map.Entry<Integer, Integer> entry : nodes.get(virusNode).freedom.entrySet()
             ) {
                 if (minFreedom > entry.getValue()) {
@@ -160,6 +172,7 @@ public class Loeng2VeebiYlesanne3 {
 
         //remove link
         System.out.println(minFreedomGatewayNode + " " + minFreedomG2Node);
+        PrintAllNodes(nodes);
 
         //model clean up
         nodes.get(minFreedomG2Node).connectedNodes.remove(minFreedomGatewayNode);
@@ -168,8 +181,6 @@ public class Loeng2VeebiYlesanne3 {
         ) {
             node.freedom.remove(minFreedomG2Node);
         }
-
-        PrintAllNodes(nodes);
     }
 
     public static void PrintAllNodes(HashMap<Integer, Node> nodes) {
@@ -178,7 +189,7 @@ public class Loeng2VeebiYlesanne3 {
             System.out.println("id:          " + node.id);
             System.out.println("freedom:     ");
 
-            for (Map.Entry<Integer,Integer> entry : node.freedom.entrySet()
+            for (Map.Entry<Integer, Integer> entry : node.freedom.entrySet()
             ) {
                 System.out.println("         id: " + entry.getKey() + " - " + entry.getValue());
             }
@@ -221,6 +232,7 @@ public class Loeng2VeebiYlesanne3 {
                 links = new int[][]{
                         {1, 2, 1},
                         {1, 3, 1},
+                        {1, 6, 1},
                         {2, 4, 1},
                         {2, 6, 1},
                         {3, 5, 1},

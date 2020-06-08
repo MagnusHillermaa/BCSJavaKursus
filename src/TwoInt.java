@@ -7,4 +7,5 @@ public class TwoInt {
     public static void main (String args[]){
 
     }
+
 }
