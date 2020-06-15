@@ -1,32 +1,30 @@
 package Lesson7;
-import java.util.*;
-import java.io.*;
-import java.math.*;
+
+import java.util.HashMap;
+import java.util.Scanner;
 
 /**
  * Auto-generated code below aims at helping you parse
  * the standard input according to the problem statement.
  **/
 
-class Player {
+class DontPanic2 {
 
 
     public static HashMap<Integer, Destination> destinations = new HashMap<>();
 
+    public static class Floor{
+        public Integer blocker = (-1);
+        public boolean isBlockerSet=false;
+
+    }
+
     public static class Destination {
-        private int id = (-1);
-        private int floor =(-1);
-        private int position =(-1);
+        private Integer id = (-1);
+        private Integer floor =(-1);
+        private Integer position =(-1);
         private boolean isExit = false;
         private boolean isClone = false;
-
-        public Destination(){
-            this.id = (-1);
-            this.floor =(-1);
-            this.position =(-1);
-            this.isExit = false;
-            this.isClone = false;
-        }
 
         public void set(Integer id, Integer floor, Integer position) {
             this.setId(id);
@@ -48,8 +46,9 @@ class Player {
             this.setId(i);
             this.setFloor(floor);
             this.setPosition(position);
-            this.setClone(true);
+            this.isClone=true;
         }
+
 
         public Integer getId() {
             return id;
@@ -82,18 +81,18 @@ class Player {
         public void setExit(boolean exit) {
             isExit = exit;
         }
-
-        public boolean isClone() {
-            return isClone;
-        }
-
-        public void setClone(boolean clone) {
-            isClone = clone;
-        }
     }
 
-    public static boolean isFloorChanged(int lastFloor, int cloneFloor){
-        return lastFloor!=cloneFloor?true:false;
+    public static Integer findCurrentDestination(int floor, HashMap<Integer, Destination> destinations) {
+        Integer currentDestination = 0;
+        for (Destination d : destinations.values()) {
+            if (floor == d.getFloor()) {
+                currentDestination = d.id;
+                if (d.isExit){
+                    break;}
+            }
+        }
+        return currentDestination;
     }
 
     public static void addBlockerAsDestination(int cloneFloor, int clonePosition){
@@ -101,7 +100,7 @@ class Player {
         destination.setClone(cloneFloor, clonePosition);
         destinations.put(destination.id, destination);
     }
-    public static boolean isObjectInCloneDirection(int cloneFloor, int clonePosition, String cloneDirection ){
+    public static boolean isThereObjectInCloneDirection(int cloneFloor, int clonePosition, String cloneDirection ){
         boolean result = false;
         for(Destination destination: destinations.values()){
             if(destination.getFloor()==cloneFloor){
@@ -119,6 +118,9 @@ class Player {
 
     public static void main(String args[]) {
 
+        Integer currentDestination = -1;
+
+
         Scanner in = new Scanner(System.in);
         int nbFloors = in.nextInt(); // number of floors
         int width = in.nextInt(); // width of the area
@@ -131,7 +133,7 @@ class Player {
 
         Destination exit = new Destination();
         exit.setExit(exitFloor, exitPos);
-        destinations.put(exit.getId(), exit);
+        destinations.put(-1, exit);
 
         for (int i = 0; i < nbElevators; i++) {
             int elevatorFloor = in.nextInt(); // floor on which this elevator is found
@@ -139,34 +141,49 @@ class Player {
 
             Destination d = new Destination();
             d.set(i, elevatorFloor, elevatorPos);
-            destinations.put(d.getId(), d);
+            destinations.put(i, d);
         }
 
-        int lastFloor=-1;
+        int i=0;
         // game loop
         while (true) {
+            i++;
             int cloneFloor = in.nextInt(); // floor of the leading clone
             int clonePos = in.nextInt(); // position of the leading clone on its floor
             String direction = in.next(); // direction of the leading clone: LEFT or RIGHT
 
-            //TEST
-            System.err.println("DIRECTION:" + direction);
-            System.err.println("Position: " + clonePos);
-            System.err.println("isFloorChanged: " + isFloorChanged(lastFloor, cloneFloor));
-
-            if(isFloorChanged(lastFloor, cloneFloor)) {
-                lastFloor=cloneFloor;
-                if (isObjectInCloneDirection(cloneFloor, clonePos, direction)) {
-                    System.out.println("WAIT");
-                } else {
-                    System.out.println("BLOCK");
-                    addBlockerAsDestination(cloneFloor, clonePos);
-                }
-            }else{
+            if (isThereObjectInCloneDirection(cloneFloor, clonePos, direction)){
                 System.out.println("WAIT");
+            }else{
+                System.out.println("BLOCK");
+                addBlockerAsDestination(cloneFloor, clonePos);
             }
+
+            System.err.println("DIRECTION:" + direction+"|");
+            System.err.println("WIDTH   : " + width);
+            System.err.println("Position: " + clonePos);
+            System.err.println("width -4: " + (clonePos>=(width-4)));
+            System.err.println("direction validation: " + (direction.equals("RIGHT")));
+            System.err.println("width validation: " + (clonePos>=width-4 && direction == "RIGHT"));
+
+            //validate current Destination
+            /*if(destinations.get(currentDestination).getFloor().intValue() != cloneFloor) {
+                currentDestination = findCurrentDestination(cloneFloor, destinations);
+            }
+            */
+
+            //decide action based on direction
+
             // Write an action using System.out.println()
             // To debug: System.err.println("Debug messages...");
+            /*
+            if (i%2==1){
+                System.out.println(getAction(currentDestination, clonePos, direction)); // action: WAIT or BLOCK
+            }else{System.out.println("WAIT");}
+            System.err.println("Debug messages: " + " "); // + " - " + currentDestination + " - " + clonePos + " - " + direction);
+            */
         }
     }
+
+
 }
